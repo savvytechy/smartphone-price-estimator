@@ -2,7 +2,9 @@
 
 A Streamlit app that estimates a smartphone's price in INR from its specifications, and gives a rough good, fair or poor value verdict for a listed price.
 
-**Important:** the data was scraped in February 2023. The estimates reflect prices from that time, not today's market.
+**Live app:** https://smartphone-price-estimator-wjvrynvnruuhwkdx3jnfqz.streamlit.app/
+
+**Important:** the data was scraped on 26 February 2023. The estimates reflect prices from that time, not today's market.
 
 ## Problem
 
@@ -10,8 +12,8 @@ Phone prices vary widely for similar specs, and a buyer rarely knows whether a l
 
 ## Dataset
 
-- **Source:** Flipkart smartphone listings on Kaggle, by dnyaneshyeole (as stated on the dataset page; I haven't independently verified the source).
-- **Scraped:** 26 February 2023.
+- **Source:** [Flipkart Smartphones Dataset](https://www.kaggle.com/datasets/dnyaneshyeole/flipkart-smartphones-dataset) on Kaggle, published under the username dnyaneshyeole.
+- **Scraped:** 26 February 2023, from Flipkart.com smartphone listings.
 - **Size:** 836 rows, 16 columns, one row per listing variant (colour, RAM and storage combinations).
 - **Target:** `original_price` (INR).
 
@@ -25,7 +27,7 @@ Every decision is made in `src/clean_data.py`, which prints the row count at eac
 | Discounted price above original price | 20 | Impossible, so the scrape is wrong |
 | Missing memory, storage, battery or rear camera | 84 | Imputing these would invent specs |
 
-- **Front camera:** 122 listings have no front camera information. Rather than drop them, I kept them, filled `front_mp` with the median (12 MP), and set `front_camera_missing = 1` so the filled value can be identified.
+- **Front camera:** 122 listings have no front camera information. These were kept, filled `front_mp` with the median (12 MP), and set `front_camera_missing = 1` so the filled value can be identified.
 - **Processor:** free text is reduced to a vendor category (Qualcomm, MediaTek, Unisoc, Samsung, Google, Apple, other, unknown). Model numbers are dropped because they aren't comparable across vendors.
 - **Rear camera:** reduced to the main sensor's megapixels and the number of lenses.
 - **Removed columns:** `ratings`, `rating_count` and `reviews` (not specs, and unknown for a phone that hasn't been listed yet); `colour` (no spec value); `battery_type` (43% missing).
@@ -59,8 +61,6 @@ Run it with `streamlit run app.py`. Enter a phone's specs and press **Estimate p
 
 The ±10% band is a rule of thumb, not a statistically derived threshold.
 
-**Live app:** https://smartphone-price-estimator-wjvrynvnruuhwkdx3jnfqz.streamlit.app/
-
 ![App screenshot](screenshots/app.png)
 
 ## Limitations
@@ -69,8 +69,8 @@ The ±10% band is a rule of thumb, not a statistically derived threshold.
 - **Listings, not sale prices:** the model predicts list price from specs. It doesn't account for seller, location, stock or discounts.
 - **Small dataset:** 730 rows is modest, and the test set has only 131 rows, so the scores have real uncertainty.
 - **Imputed front camera:** 122 phones have a median-filled front camera. This may understate the difference between phones with and without an unusual front camera.
-- **Not validated on new phones:** the test set holds out whole models, but all of them are from the same 2023 listings. Performance on phones released later is unknown.
-- **Verdict is a heuristic:** the good/poor value labels compare a listed price with the model's estimate. They are not investment or purchase advice.
+- **Not validated on new phones:** the test set holds out whole models, but all of them come from the same 2023 listings. Performance on phones released later is unknown.
+- **Verdict is a heuristic:** the good/poor value labels compare a listed price with the model's estimate. They are not purchase advice.
 
 ## Reproduce
 
@@ -78,15 +78,15 @@ Put `flipkart_smartphones.csv` in the `data/` folder (not committed to git), the
 
 ```bash
 pip install -r requirements.txt
-python -m src.clean_data
-python -m src.train
+python retrain.py
 streamlit run app.py
 ```
+
+`retrain.py` runs the cleaning and training steps in order.
 
 ## Next steps
 
 - Check the estimates against phones released after February 2023.
 - Compare against a simpler model that uses only memory and storage, to see how much the other specs add.
 - Normalise brand and vendor labels (for example "GOOGLE" and "google") so the dropdowns are clean.
-- Add a test for the cleaning steps.
-- Deploy the app to Streamlit Community Cloud.
+- Add tests for the cleaning steps.
