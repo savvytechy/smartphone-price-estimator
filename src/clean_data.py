@@ -94,8 +94,15 @@ def main() -> None:
     df["rear_lens_count"] = [r[1] for r in rear]
     df["front_mp"] = df["front_camera"].apply(parse_front_camera)
 
+    # Front camera: keep the phone, record that the value was filled, use the median.
+    df["front_camera_missing"] = df["front_mp"].isna().astype(int)
+    front_median = df["front_mp"].median()
+    df["front_mp"] = df["front_mp"].fillna(front_median)
+    print(f"Front camera filled with median ({front_median} MP) for "
+          f"{df['front_camera_missing'].sum()} phones")
+
     # 4. Drop rows missing a core spec. Imputing these would invent specs for real phones.
-    core = ["memory", "storage", "battery_capacity", "front_mp", "rear_main_mp"]
+    core = ["memory", "storage", "battery_capacity", "rear_main_mp"]
     n_before = len(df)
     df = df.dropna(subset=core)
     print(f"Dropped rows missing a core spec ({', '.join(core)}): {n_before - len(df)}")
