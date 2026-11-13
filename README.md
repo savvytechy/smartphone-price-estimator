@@ -59,6 +59,8 @@ Run it with `streamlit run app.py`. Enter a phone's specs and press **Estimate p
 
 The ±10% band is a rule of thumb, not a statistically derived threshold.
 
+**Live app:** https://smartphone-price-estimator-wjvrynvnruuhwkdx3jnfqz.streamlit.app/
+
 ![App screenshot](screenshots/app.png)
 
 ## Limitations
